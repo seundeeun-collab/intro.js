@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "description": "Schema for instructions, rules and commands supplied to the bot",
+  "instructions": {
+    "type": ["string", "array", "object"],
+    "examples": [
+      "Navigate to https://msport.com and click the accept cookies button",
+      [ { "type": "navigate", "url": "https://msport.com" }, { "type": "click", "selector": "#accept" } ]
+    ]
+  },
+  "rules": {
+    "avoidCaptcha": { "type": "boolean", "default": true },
+    "humanLike": { "type": "boolean", "default": true },
+    "minActionDelay": { "type": "number", "default": 800 },
+    "maxActionDelay": { "type": "number", "default": 1800 }
+  }
+}

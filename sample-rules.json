@@ -1,0 +1,8 @@
+{
+  "avoidCaptcha": true,
+  "humanLike": true,
+  "minActionDelay": 600,
+  "maxActionDelay": 1600,
+  "avoidRepeatedClickInterval": 3000,
+  "followInstructions": true
+}

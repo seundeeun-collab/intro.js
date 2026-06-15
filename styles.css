@@ -1,0 +1,236 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #070b18;
+  color: #e6edf8;
+  line-height: 1.6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, rgba(45, 125, 245, 0.18), transparent 38%),
+    linear-gradient(180deg, #070b18 0%, #050815 100%);
+}
+
+.app-shell {
+  width: min(1200px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 3rem;
+}
+
+.hero {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background: rgba(14, 21, 45, 0.82);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2);
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: #80bdff;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2.3rem, 4vw, 3.5rem);
+  letter-spacing: -0.04em;
+}
+
+.hero-copy {
+  margin: 1.2rem 0 0;
+  max-width: 55rem;
+  color: #c8d6f5;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.95rem 1.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(128, 189, 255, 0.35);
+  background: rgba(45, 125, 245, 0.18);
+  color: #d7e0ff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  background: rgba(45, 125, 245, 0.28);
+}
+
+.grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.card {
+  background: rgba(10, 16, 34, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 24px;
+  padding: 1.8rem;
+  box-shadow: 0 18px 60px rgba(1, 3, 10, 0.25);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 1.45rem;
+}
+
+.stats {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.stat-item {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.stat-item span {
+  color: #8ca4d8;
+  font-size: 0.95rem;
+}
+
+.stat-item strong {
+  color: #eff6ff;
+}
+
+.search-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.search-group {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+}
+
+label {
+  display: block;
+  font-size: 0.95rem;
+  color: #95a7cc;
+}
+
+input[type="search"] {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f0f6ff;
+}
+
+input[type="search"]:focus {
+  outline: 2px solid rgba(66, 147, 255, 0.35);
+  outline-offset: 2px;
+}
+
+button[type="submit"] {
+  border: none;
+  border-radius: 16px;
+  padding: 0 1.25rem;
+  min-width: 10rem;
+  background: linear-gradient(135deg, #3e70ff, #4ab4ff);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  filter: brightness(1.05);
+}
+
+.note {
+  margin: 0.85rem 0 0;
+  color: #9bb1d6;
+  font-size: 0.95rem;
+}
+
+.feature-list {
+  padding-left: 1.2rem;
+  margin: 1rem 0 0;
+}
+
+.feature-list li {
+  margin-bottom: 0.7rem;
+}
+
+.card-embed {
+  display: flex;
+  flex-direction: column;
+}
+
+.iframe-wrap {
+  position: relative;
+  width: 100%;
+  min-height: 320px;
+  margin-top: 1rem;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.footer {
+  margin-top: 2rem;
+  padding: 1.5rem 1.8rem;
+  border-radius: 22px;
+  background: rgba(10, 16, 34, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer p {
+  margin: 0;
+  color: #b8c6eb;
+}
+
+@media (max-width: 860px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 1.5rem;
+    grid-template-columns: 1fr;
+  }
+
+  .search-group {
+    grid-template-columns: 1fr;
+  }
+
+  button[type="submit"] {
+    width: 100%;
+  }
+}

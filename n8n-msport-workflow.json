@@ -1,0 +1,41 @@
+{
+  "name": "msport-virtual-football-bot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "msport-bot",
+        "responseMode": "onReceived",
+        "responseData": "string",
+        "responseBody": "Received msport bot payload",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [260, 260]
+    },
+    {
+      "parameters": {
+        "functionCode": "const payload = items[0].json;\nreturn [{ json: { receivedAt: new Date().toISOString(), summary: payload } }];"
+      },
+      "name": "Parse Payload",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [520, 260]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

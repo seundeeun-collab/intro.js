@@ -1,0 +1,5 @@
+[
+  "Navigate to https://msport.com and wait for the results table",
+  { "type": "waitForSelector", "selector": "table tr", "timeout": 20000 },
+  { "type": "screenshot", "path": "bot-data/after-load.png" }
+]

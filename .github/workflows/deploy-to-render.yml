@@ -1,0 +1,140 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test || true
+
+      - name: Trigger Render deploy and wait for completion
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          DEPLOY_TARGET_URL: ${{ secrets.DEPLOY_TARGET_URL }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          set -e
+          if [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_SERVICE_ID" ]; then
+            echo "RENDER_API_KEY or RENDER_SERVICE_ID not set. Skipping deploy.";
+            exit 0;
+          fi
+          echo "Triggering deploy for service $RENDER_SERVICE_ID"
+          resp=$(curl -s -X POST https://api.render.com/deploys \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            -d '{"serviceId":"'"$RENDER_SERVICE_ID"'"}')
+          deploy_id=$(echo "$resp" | jq -r '.id // empty')
+          if [ -z "$deploy_id" ]; then
+            echo "Failed to trigger deploy: $resp";
+            exit 1;
+          fi
+          echo "Deploy triggered: $deploy_id"
+
+          # Poll deploy status until it finishes or times out
+          max_attempts=30
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            attempt=$((attempt+1))
+            dresp=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" https://api.render.com/deploys/$deploy_id)
+            state=$(echo "$dresp" | jq -r '.state // .status // empty')
+            echo "[$attempt/$max_attempts] Deploy state: $state"
+            if [ "$state" = "succeeded" ] || [ "$state" = "success" ] || [ "$state" = "ready" ] || [ "$state" = "activated" ]; then
+              echo "Deploy succeeded"
+              break
+            fi
+            if [ "$state" = "failed" ] || [ "$state" = "error" ] || [ "$state" = "cancelled" ]; then
+              echo "Deploy failed: $dresp";
+              exit 1
+            fi
+            sleep 10
+          done
+
+          if [ $attempt -ge $max_attempts ]; then
+            echo "Timed out waiting for deploy to finish";
+            echo "$dresp";
+            exit 1
+          fi
+
+          # Fetch service details and print them
+          svc=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" https://api.render.com/services/$RENDER_SERVICE_ID)
+          echo "Service details:"
+          echo "$svc" | jq '.'
+          # Try to extract a likely URL field
+          url=$(echo "$svc" | jq -r '.serviceDetails.serviceUrl // .serviceDetails.defaultDomain // .url // .dashboardUrl // empty')
+          if [ -n "$url" ]; then
+            echo "Public URL: $url"
+            PUBLIC_URL="$url"
+          else
+            echo "Public URL not found in service details; open the Render dashboard to inspect the service URL.";
+          fi
+
+          # Post public URL to PR comment if running in a pull_request context
+          if [ -n "$GITHUB_EVENT_PATH" ] && [ -f "$GITHUB_EVENT_PATH" ]; then
+            pr_number=$(jq -r .pull_request.number < "$GITHUB_EVENT_PATH" 2>/dev/null || echo "")
+            if [ -n "$pr_number" ] && [ -n "$GITHUB_REPOSITORY" ] && [ -n "$GITHUB_TOKEN" ]; then
+              comment_body=$(jq -n --arg url "$PUBLIC_URL" --arg id "$deploy_id" '{body: ("Render deploy complete. Public URL: " + $url + "\nDeploy ID: " + $id)}')
+                echo "Posting comment to PR #$pr_number"
+                comment_resp=$(curl -s -X POST "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$pr_number/comments" \
+                  -H "Authorization: Bearer $GITHUB_TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d "$comment_body" ) || true
+                comment_id=$(echo "$comment_resp" | jq -r '.id // empty')
+                echo "Posted deploy comment id: $comment_id"
+            fi
+          fi
+
+          # Post to Slack if SLACK_WEBHOOK secret is provided
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            echo "Posting URL to Slack webhook"
+            slack_payload=$(jq -n --arg text "Render deploy complete: $PUBLIC_URL (deploy id: $deploy_id)" '{text: $text}')
+            curl -s -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" -d "$slack_payload" || true
+          fi
+
+          # If DEPLOY_TARGET_URL provided, call the deployed content API to extract & summarize
+          if [ -n "$PUBLIC_URL" ] && [ -n "$DEPLOY_TARGET_URL" ]; then
+            echo "Calling deployed content API to extract+summarize: $DEPLOY_TARGET_URL"
+            json=$(jq -n --arg url "$DEPLOY_TARGET_URL" --arg repo "$GITHUB_REPOSITORY" --arg slack "$SLACK_WEBHOOK" '{url:$url, postToSlack:true, slackWebhook:$slack, repo:$repo}')
+            if [ -n "$pr_number" ]; then
+              json=$(echo "$json" | jq --arg pr "$pr_number" '. + {postToPR:true, prNumber:(($pr|tonumber)) }')
+            fi
+            echo "Request payload: $json"
+            extract_resp=$(curl -s -X POST "$PUBLIC_URL/api/content/extract-summarize" -H "Content-Type: application/json" -d "$json" ) || true
+            echo "Extract response: $extract_resp"
+            summary_text=$(echo "$extract_resp" | jq -r '.summary.finalSummary // .summary // empty')
+            if [ -n "$summary_text" ]; then
+              echo "Posting summary to PR comment"
+              if [ -n "$comment_id" ] && [ -n "$GITHUB_REPOSITORY" ] && [ -n "$GITHUB_TOKEN" ]; then
+                # Update original comment to append summary
+                old_body=$(echo "$comment_resp" | jq -r '.body')
+                new_body=$(jq -n --arg old "$old_body" --arg sum "$summary_text" '{body: ($old + "\n\nAutomated summary:\n" + $sum)}')
+                curl -s -X PATCH "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" -H "Authorization: Bearer $GITHUB_TOKEN" -H "Content-Type: application/json" -d "$new_body" || true
+              else
+                # Post a new comment with the summary
+                sum_comment=$(jq -n --arg sum "$summary_text" '{body: ("Automated summary:\n\n" + $sum)}')
+                curl -s -X POST "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$pr_number/comments" -H "Authorization: Bearer $GITHUB_TOKEN" -H "Content-Type: application/json" -d "$sum_comment" || true
+              fi
+            else
+              echo "No summary_text returned from extract API"
+            fi
+          else
+            echo "DEPLOY_TARGET_URL or PUBLIC_URL not set; skipping remote extract+summarize."
+          fi

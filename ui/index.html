@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Bot Dashboard</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 16px; }
+      #log { height: 400px; overflow: auto; border: 1px solid #ddd; padding: 8px; }
+      .event { margin-bottom: 6px; padding: 6px; border-bottom: 1px solid #f0f0f0; }
+      form { margin-top: 12px; }
+      textarea { width: 100%; height: 120px; }
+    </style>
+  </head>
+  <body>
+    <h2>Automation Bot — Dashboard</h2>
+    <div id="log"></div>
+
+    <form id="instrForm">
+      <label>Send instructions (JSON or plain text):</label>
+      <textarea id="instructions">["Navigate to https://msport.com and wait for the results table"]</textarea>
+      <button type="submit">Send Instructions</button>
+    </form>
+
+    <button id="runBot">Run Bot Now</button>
+    <div id="runStatus" style="margin-top: 12px; color: #333;"></div>
+
+    <script src="/ui/app.js"></script>
+  </body>
+</html>

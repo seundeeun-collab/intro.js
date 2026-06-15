@@ -1,0 +1,16 @@
+[
+  {
+    "type": "navigate",
+    "url": "https://msport.com"
+  },
+  {
+    "type": "waitForSelector",
+    "selector": "table tr",
+    "timeout": 20000
+  },
+  {
+    "type": "screenshot",
+    "path": "bot-data/initial-page.png",
+    "fullPage": true
+  }
+]

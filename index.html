@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Football Prediction Bot</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="scripts.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Automation prediction bot</p>
+          <h1>Virtual Football Dashboard</h1>
+          <p class="hero-copy">
+            Monitor your bot, inspect predictions and trends, and search websites from one browser page.
+          </p>
+        </div>
+        <a class="button" href="#search" role="button">Search Websites</a>
+      </header>
+
+      <section class="grid">
+        <article class="card">
+          <h2>Bot status</h2>
+          <p>
+            Your automation bot runs on <strong>msport.com</strong> and collects match odds,
+            score history, and trends.
+          </p>
+          <div class="stats" id="live-status">
+            <div class="stat-item">
+              <span>Source</span>
+              <strong>msport.com</strong>
+            </div>
+            <div class="stat-item">
+              <span>Status</span>
+              <strong id="status-text">Loading...</strong>
+            </div>
+            <div class="stat-item">
+              <span>Last updated</span>
+              <strong id="status-time">—</strong>
+            </div>
+            <div class="stat-item">
+              <span>Records</span>
+              <strong id="record-count">—</strong>
+            </div>
+            <div class="stat-item">
+              <span>Mean odds</span>
+              <strong id="mean-odds">—</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="card" id="search">
+          <h2>Search websites</h2>
+          <p>Use the search box below to run a Google search for any website or query.</p>
+          <form class="search-form" action="https://www.google.com/search" method="get" target="_blank">
+            <label for="query">Search query</label>
+            <div class="search-group">
+              <input id="query" name="q" type="search" placeholder="Search the web..." />
+              <button type="submit">Search</button>
+            </div>
+          </form>
+          <p class="note">This opens Google search in a new tab. If embedding is blocked, use the button above.</p>
+        </article>
+
+        <article class="card">
+          <h2>Prediction overview</h2>
+          <p>
+            The bot is designed to analyze historical scores, odds, and hidden patterns to generate
+            probability-based football insights.
+          </p>
+          <ul class="feature-list">
+            <li>Historical score trend detection</li>
+            <li>Probability analysis with math/stats</li>
+            <li>AI model prediction pipeline</li>
+            <li>Automation workflow integration</li>
+          </ul>
+        </article>
+
+        <article class="card card-embed">
+          <h2>Google preview</h2>
+          <p>Embedded Google homepage for quick browsing. If it does not load, open search results instead.</p>
+          <div class="iframe-wrap">
+            <iframe src="https://www.google.com/webhp?igu=1" title="Google homepage"></iframe>
+          </div>
+        </article>
+      </section>
+
+      <footer class="footer">
+        <p>
+          Open this file in your browser to view the dashboard. Update the bot scripts and data files to
+          reflect live automation results.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>
